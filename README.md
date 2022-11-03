@@ -8,7 +8,7 @@
 3. Install Parallels Desktop 18
    1. Activate using the account eddy.lau@gmail.com
    2. Download Ubuntu 16.04 desktop image
-      1. Install exFAT support
+      1. Install [exFAT support](https://geekrewind.com/how-to-enable-exfat-filesystem-support-on-ubuntu-16-04-18-04/)
 4. Install Xcode
    1. Login App Store with account eddie@ktc.hk
    2. Download and install Xcode from App Store 
