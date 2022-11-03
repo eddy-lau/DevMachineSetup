@@ -18,6 +18,7 @@
    3. Set to “Change picture every 30 minutes”
    4. Set to Random order
    5. Position the dock to the left
+   6. Change desktop icon size to 96x96
 6. Install AnyDesk
    1. Configure Permissions
    2. Set Password for unattended access
