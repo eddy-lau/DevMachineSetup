@@ -29,4 +29,7 @@
 9. Install [SourceTree](https://www.sourcetreeapp.com/)
 10. Install [Microsoft Teams](https://www.microsoft.com/en-ww/microsoft-teams/download-app)
 11. Install [Magnet](https://apps.apple.com/hk/app/magnet/id441258766?l=en&mt=12) from App Store.
+12. Restore SSH Keys
+   1. Copy all ssh files from Time Machine Backup: `/Volumes/Time Machine Backups 2TB/Backups.backupdb/iMac/2022-10-31-185317/Mac OS 1011 - Data/Users/eddie/.ssh`
+
 
