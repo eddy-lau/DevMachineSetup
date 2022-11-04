@@ -40,5 +40,6 @@
 14. Install [Google Drive](https://www.google.com/drive/download/)
 15. Install [OneDrive](https://www.microsoft.com/en-ww/microsoft-365/onedrive/download)
 16. Install [Whatsapp](https://www.whatsapp.com/)
+17. Install [Outlook](https://apps.apple.com/hk/app/microsoft-outlook/id985367838?l=en&mt=12)
 
 
