@@ -27,4 +27,5 @@
 8. Set schedule startup and shutdown time
    1. In setting energy saver
 9. Install [SourceTree](https://www.sourcetreeapp.com/)
+10. Install [Microsoft Teams](https://www.microsoft.com/en-ww/microsoft-teams/download-app)
 
