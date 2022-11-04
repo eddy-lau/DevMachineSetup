@@ -6,11 +6,11 @@
    1. Log in firefox account
    2. Set default zoom to 133%
 3. Install Parallels Desktop 18
-   1. Activate using the account `e******u@gmail.com`
+   1. Activate using the account: `e******u@gmail.com`
    2. Download Ubuntu 16.04 desktop image
       1. Install [exFAT support](https://geekrewind.com/how-to-enable-exfat-filesystem-support-on-ubuntu-16-04-18-04/)
 4. Install Xcode
-   1. Login App Store with account eddie@ktc.hk
+   1. Login App Store with account: `*****@ktc.hk`
    2. Download and install Xcode from App Store 
 5. Setup Desktop
    1. Added more workspaces
