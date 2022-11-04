@@ -12,6 +12,8 @@
 4. Install Xcode
    1. Login App Store with account: `*****@ktc.hk`
    2. Download and install Xcode from App Store 
+   3. Export Certs from an another mac.
+   4. Import Certs to this mac.
 5. Setup Desktop
    1. Added more workspaces
    2. Download all wallpapers
@@ -28,6 +30,7 @@
 8. Set schedule startup and shutdown time
    1. In setting energy saver
 9. Install [SourceTree](https://www.sourcetreeapp.com/)
+   1. Install command line tools
 10. Install [Microsoft Teams](https://www.microsoft.com/en-ww/microsoft-teams/download-app)
 11. Install [Magnet](https://apps.apple.com/hk/app/magnet/id441258766?l=en&mt=12) from App Store.
 12. Restore SSH Keys
