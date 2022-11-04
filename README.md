@@ -2,11 +2,11 @@
 
 1. Install Monterey from OCLP Monterey install USB.
    1. Erase hard disk and clean install
-2. Install Firebase
-   1. Log in firebase account
+2. Install Firefox
+   1. Log in firefox account
    2. Set default zoom to 133%
 3. Install Parallels Desktop 18
-   1. Activate using the account eddy.lau@gmail.com
+   1. Activate using the account e******u@gmail.com
    2. Download Ubuntu 16.04 desktop image
       1. Install [exFAT support](https://geekrewind.com/how-to-enable-exfat-filesystem-support-on-ubuntu-16-04-18-04/)
 4. Install Xcode
