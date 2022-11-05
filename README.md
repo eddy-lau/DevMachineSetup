@@ -25,6 +25,7 @@
    1. Configure Permissions
    2. Set Password for unattended access
    3. Install AnyDesk Service
+   4. Add access control list
 7. Install VSCode
    1. [Added code to PATH](https://code.visualstudio.com/docs/setup/mac).
 8. Set schedule startup and shutdown time
@@ -44,5 +45,7 @@
 15. Install [OneDrive](https://www.microsoft.com/en-ww/microsoft-365/onedrive/download)
 16. Install [Whatsapp](https://www.whatsapp.com/)
 17. Install [Outlook](https://apps.apple.com/hk/app/microsoft-outlook/id985367838?l=en&mt=12)
+18. Install [Jump Desktop](https://jumpdesktop.com/connect/)
+    1. Log in Jump Desktop with account: `e*******@gmail.com`
 
 
