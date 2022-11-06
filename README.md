@@ -47,5 +47,6 @@
 17. Install [Outlook](https://apps.apple.com/hk/app/microsoft-outlook/id985367838?l=en&mt=12)
 18. Install [Jump Desktop](https://jumpdesktop.com/connect/)
     1. Log in Jump Desktop with account: `e*******@gmail.com`
+19. Install [Dropbox](https://www.dropbox.com/install)
 
 
