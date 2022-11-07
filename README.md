@@ -48,5 +48,6 @@
 18. Install [Jump Desktop](https://jumpdesktop.com/connect/)
     1. Log in Jump Desktop with account: `e*******@gmail.com`
 19. Install [Dropbox](https://www.dropbox.com/install)
+20. Install [Wechat](https://apps.apple.com/hk/app/wechat/id836500024?l=en&mt=12)
 
 
