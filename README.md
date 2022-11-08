@@ -51,5 +51,5 @@
 20. Install [Wechat](https://apps.apple.com/hk/app/wechat/id836500024?l=en&mt=12)
 20. Install [Office](https://support.microsoft.com/en-us/office/download-and-install-or-reinstall-microsoft-365-or-office-2021-on-a-pc-or-mac-4414eaaf-0478-48be-9c42-23adc4716658#bkmk_signintodownload)
     1. Login and activate with school account: `s******@cloud.satkp.edu.hk`
-
+21. Install [Draw.io App](https://github.com/jgraph/drawio-desktop/releases)
 
