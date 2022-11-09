@@ -28,6 +28,7 @@
    4. Add access control list
 7. Install VSCode
    1. [Added code to PATH](https://code.visualstudio.com/docs/setup/mac).
+   1. Turn on setting sync with my github account.
 8. Set schedule startup and shutdown time
    1. In setting energy saver
 9. Install [SourceTree](https://www.sourcetreeapp.com/)
