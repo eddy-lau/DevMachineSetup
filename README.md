@@ -57,6 +57,7 @@
 23. Install [Zoom](https://zoom.us/support/download).
     1. Setting [permissions](https://support.zoom.us/hc/en-us/articles/360016688031)
 24. Install [Android Studio](https://developer.android.com/studio)
+    1. Install NDK and [CMake 3.18.1](https://developer.android.com/studio/projects/install-ndk#specific-version) in SDK manager.
 25. [Homebrew](https://brew.sh/)
 26. [RVM](https://nrogap.medium.com/install-rvm-in-macos-step-by-step-d3b3c236953b)
     1. Install ruby 2.6: `rvm install 2.6`
