@@ -62,4 +62,4 @@
     1. Install ruby 2.6: `rvm install 2.6`
     1. Install cocoapods: `gem install cocoapods`
     1. Install xcpretty: `gem install xcpretty`
-27. [Java](https://stackoverflow.com/questions/65601196/how-to-brew-install-java)
+27. [JDK 11](https://www.azul.com/downloads/?version=java-11-lts&os=macos&architecture=x86-64-bit&package=jdk)
