@@ -60,7 +60,7 @@
     1. Install NDK and [CMake 3.18.1](https://developer.android.com/studio/projects/install-ndk#specific-version) in SDK manager.
     1. Setup paths in `.zshrc`:
        ```bash
-       export ANDROID_HOME='~/Library/Android/sdk'
+       export ANDROID_HOME='/Users/eddie/Library/Android/sdk'
        export PATH=$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$PATH
        ```
 25. [Homebrew](https://brew.sh/)
