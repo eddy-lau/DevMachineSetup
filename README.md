@@ -69,3 +69,7 @@
     1. Install cocoapods: `gem install cocoapods`
     1. Install xcpretty: `gem install xcpretty`
 27. [JDK 11](https://www.azul.com/downloads/?version=java-11-lts&os=macos&architecture=x86-64-bit&package=jdk)
+28. [Pyenv](https://github.com/pyenv/pyenv#set-up-your-shell-environment-for-pyenv)
+    1. Install python 3.9: `pyenv install 3.9`
+    1. Use python 3.9: `pyenv local 3.9.16`
+    1. Install opencv: `pip install opencv-python`
