@@ -73,3 +73,4 @@
     1. Install python 3.9: `pyenv install 3.9`
     1. Use python 3.9: `pyenv local 3.9.16`
     1. Install opencv: `pip install opencv-python`
+    2. Install mediapipe: `pip install mediapipe` (or `pip install mediapipe-silicon` for Apple Silicon)
