@@ -75,3 +75,5 @@
     1. Install opencv: `pip install opencv-python`
     2. Install mediapipe: `pip install mediapipe` (or `pip install mediapipe-silicon` for Apple Silicon)
 29. [Flutter](https://docs.flutter.dev/get-started/install/macos)
+    1. Unzip the zip file and move to `~/SDKs`. 
+    1. Setup path in `.zshrc`: `export PATH="$PATH:$HOME/SDKs/flutter/bin"`
