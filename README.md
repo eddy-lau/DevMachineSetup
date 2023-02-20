@@ -77,3 +77,5 @@
 29. [Flutter](https://docs.flutter.dev/get-started/install/macos)
     1. Unzip the zip file and move to `~/SDKs`. 
     1. Setup path in `.zshrc`: `export PATH="$PATH:$HOME/SDKs/flutter/bin"`
+30. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions)
+    1. Download the GUI installer and execute it.
