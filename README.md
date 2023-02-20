@@ -82,8 +82,8 @@
     2. Configure the AWS credential:
     ```
     aws configure
-    AWS Access Key ID: AKIAY2THQOGI243K3LRB
-    AWS Secret Access Key: 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
+    AWS Access Key ID: AK************RB
+    AWS Secret Access Key: vKog************************zcXHrG9
     Default region name: ap-southeast-1 
     Default output format: None 
     
