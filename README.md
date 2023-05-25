@@ -65,7 +65,7 @@
        ```
 25. [Homebrew](https://brew.sh/)
 26. [RVM](https://nrogap.medium.com/install-rvm-in-macos-step-by-step-d3b3c236953b)
-    1. Install ruby 2.6: `rvm install 2.6`
+    1. Install ruby 2.7: `rvm install 2.7`
     1. Install cocoapods: `gem install cocoapods`
     1. Install xcpretty: `gem install xcpretty`
 27. [JDK 11](https://www.azul.com/downloads/?version=java-11-lts&os=macos&architecture=x86-64-bit&package=jdk)
