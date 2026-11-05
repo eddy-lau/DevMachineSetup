@@ -49,6 +49,7 @@ export SENSENOVA_API_KEY=...
 export MISTRAL_API_KEY=...
 export OPENXLAB_API_KEY=...
 export ATRIA_API_KEY=...
+export PANOPTICLLM_APIKEY=...
 export Z_AI_API_KEY=...
 ```
 
@@ -57,10 +58,41 @@ export Z_AI_API_KEY=...
 ## Included
 
 - Default model `opencode-go/deepseek-v4.1-flash` (same as the mini; change via `/models` if unavailable)
-- Providers: Agnes AI, SenseNova, Mistral, OpenXLab, Atria, local Ollama auto-discovery
+- Providers: Agnes AI, SenseNova, Mistral, OpenXLab, Atria, Panoptic LLM, local Ollama auto-discovery
 - Subagents: `vision` (Kimi K3), `architect` (GLM-5.3)
 - Plugin: `github:eddy-lau/opencode-file-viewer`
 - MCP servers: `zai-mcp-server` (npx), `serena` (uvx)
+
+## Panoptic LLM (office)
+
+Kristian's office gateway serves two models on one OpenAI-compatible endpoint:
+
+| Model | Kind | Notes |
+|---|---|---|
+| `qwen3.8-27b` | chat | llama.cpp, 128K ctx, text + image + PDF input, reasoning |
+| `qwen-image-2.1` | image | ComfyUI behind `/v1/images/generations` |
+
+```bash
+opencode run --model panoptic/qwen3.8-27b "explain RAID levels briefly"
+```
+
+Endpoint is the tailnet IP, so it works on the office LAN and off-site:
+`http://100.110.22.90:9000/v1`. Alternatives: `http://192.168.1.230:9000/v1`
+(LAN), `https://llm.panoptic.ai/v1` (TLS).
+
+Caveats:
+
+- Chat and image generation share VRAM. Generating an image stops the chat
+  model (~150 s cold swap), and the next chat pays the cold start again.
+- One slot, requests are queued and served in order; chat is prioritised
+  over images. Expect ~9-19 tok/s and 8-60 s cold-start latency.
+- Thinking text arrives in `reasoning_content`; the `no-thinking` variant
+  sends `X-Disable-Thinking: 1` to skip it.
+- The background service does not inherit shell exports. If `{env:...}`
+  resolves empty, point `apiKey` at a file instead:
+  `"apiKey": "{file:~/.config/opencode/panoptic-api-key}"`.
+- The first image request after a chat session can fail with `ECONNRESET`
+  while the gateway swaps VRAM. Retry once — it succeeds on the second try.
 
 ## Not included
 

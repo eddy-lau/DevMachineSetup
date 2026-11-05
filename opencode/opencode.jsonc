@@ -85,11 +85,62 @@
         "Atria-Dawn-Preview": { "name": "Atria Dawn Preview" }
       }
     },
+    "panoptic": {
+      "name": "Panoptic LLM (office)",
+      "env": ["PANOPTICLLM_APIKEY"],
+      "package": "@opencode/ai/providers/openai-compatible",
+      // Tailnet endpoint works on the office LAN and off-site. LAN alternative:
+      // http://192.168.1.230:9000/v1; TLS alternative: https://llm.panoptic.ai/v1
+      "settings": {
+        "baseURL": "http://100.110.22.90:9000/v1",
+        "headerTimeout": 600000,
+        "chunkTimeout": 900000
+      },
+      "models": {
+        "qwen3.8-27b": {
+          "name": "Qwen3.8 27B (panoptic)",
+          "capabilities": {
+            "tools": true,
+            "input": ["text", "image", "pdf"],
+            "output": ["text"]
+          },
+          // llama-server streams thinking in reasoning_content (non-standard).
+          "compatibility": {
+            "reasoningField": "reasoning_content"
+          },
+          "variants": [
+            {
+              "id": "no-thinking",
+              "headers": {
+                "X-Disable-Thinking": "1"
+              }
+            }
+          ],
+          "limit": { "context": 131072, "output": 8192 }
+        },
+        "qwen-image-2.1": {
+          "name": "Qwen-Image 2.1 (panoptic)",
+          "type": "image",
+          "package": "@opencode/ai/providers/openai-compatible/images",
+          "capabilities": {
+            "input": ["text", "image"],
+            "output": ["image"]
+          }
+        }
+      }
+    },
     "ollama": {
       "name": "Ollama (local)",
       "settings": {
         "baseURL": "http://127.0.0.1:11434/v1"
       }
+    }
+  },
+
+  // Default image model for the experimental_image_generate tool.
+  "experimental": {
+    "image_generate": {
+      "model": "panoptic/qwen-image-2.1"
     }
   },
 

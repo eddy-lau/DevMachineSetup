@@ -437,6 +437,11 @@ Secrets stay out of the repo: run `opencode auth login` and export the provider 
 listed in `opencode/env.example`. See [`opencode/README.md`](opencode/README.md) for
 what is included, what is excluded, and troubleshooting.
 
+The office **Panoptic LLM** (`panoptic/qwen3.8-27b` for chat,
+`panoptic/qwen-image-2.1` for images) is also configured there. It reaches the gateway
+over Tailscale, so it works on the office LAN and off-site; chat and image generation
+share VRAM, so generating an image evicts the chat model for ~150 s.
+
 ## 12. Maintenance
 
 ```bash
