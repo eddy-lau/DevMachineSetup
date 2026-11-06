@@ -94,6 +94,102 @@ Caveats:
 - The first image request after a chat session can fail with `ECONNRESET`
   while the gateway swaps VRAM. Retry once — it succeeds on the second try.
 
+## ZCode remote worker (Start Plan)
+
+The mini can delegate tasks from OpenCode to the ZCode desktop app through
+Chrome DevTools MCP. This uses ZCode's official Remote Control page, so it spends
+the free **Start Plan** quota (`account:zai-start-plan`, `GLM-5.3-Flash`) instead
+of the standalone CLI, which cannot use Start Plan headlessly.
+
+Machine-local pieces:
+
+| Path | Purpose |
+|---|---|
+| `~/.config/opencode/zcode-remote/bridge.js` | In-page helper injected with `evaluate_script` |
+| `~/.config/opencode/zcode-remote/install.sh` | Copies the helper to the OS temp dir |
+| `~/.config/opencode/skills/zcode-remote/SKILL.md` | Agent workflow and safety rules |
+| `~/.config/opencode/commands/zcode.md` | `/zcode <task>` command |
+| `~/.cache/chrome-devtools-mcp/chrome-profile` | Dedicated Chrome profile with the Z.ai login |
+
+Requirements:
+
+- `chrome_devtools` MCP server:
+  `npx -y chrome-devtools-mcp@latest --headless --viewport=1440x900 --no-usage-statistics`
+  with a 900000 ms timeout. Headless keeps the automation browser off-screen; Teams
+  renders under the `HeadlessChrome` UA without complaint. The MCP server launches
+  its own Chrome profile; `--autoConnect` is not used because macOS blocks OpenCode
+  from reading the main Chrome profile's `DevToolsActivePort`.
+- The ZCode remote tab open in the MCP-managed Chrome profile, signed in with the
+  same Z.ai account as the desktop app, with a task/session view open. In headless
+  mode there is no window to open it manually, so either navigate the MCP browser
+  to a fresh remote link or keep a session restore path.
+- ZCode workspace, provider **Start Plan**, model **GLM-5.3-Flash**, and Plan or
+  Ask-before-changes mode selected in the remote UI.
+
+Usage:
+
+```text
+/zcode inspect this repo and summarize AGENTS.md
+```
+
+Caveats:
+
+- The remote-control URL is a bearer credential. Never log or commit it.
+- The MCP browser profile contains Z.ai cookies; treat it as secret. Keep that
+  Chrome profile dedicated to ZCode; the MCP server can read every tab in it.
+- One ZCode turn at a time. The helper reports `needsApproval` and `timedOut`.
+- DOM automation can break when the ZCode web UI changes.
+- Do not use Full access/yolo unless the user explicitly asks.
+
+## Teams personal web client
+
+Teams personal accounts have no Graph API: delegated personal Microsoft accounts
+are explicitly unsupported for Teams chat and channel endpoints. A machine-local
+`/teams` helper drives `https://teams.live.com/v2/` through the same Chrome
+DevTools MCP instead.
+
+| Path | Purpose |
+|---|---|
+| `~/.config/opencode/skills/teams-web/SKILL.md` | Selectors, recipes, and safety rules (verified 2026-11-06) |
+| `~/.config/opencode/skills/teams-web/voice.md` | Learned voice profile; mandatory for all sends |
+| `~/.config/opencode/commands/teams.md` | `/teams <task>` command |
+
+Requirements:
+
+- The MCP Chrome profile signed into the personal Microsoft account. Sign-in is
+  manual (password + MFA); cookies persist in the profile.
+- A `teams.live.com/v2/` tab with the chat list rendered. The browser is headless,
+  so the tab must be created with `new_page` or `navigate_page`; there is no visible
+  window to click.
+
+Usage:
+
+```text
+/teams summarize unread messages in PAI Research
+```
+
+Caveats:
+
+- Read-only by default. Sends only when the task says to send.
+- DOM automation, polling only. No webhook or event stream; not suitable for
+  always-on monitoring.
+- Selectors are undocumented and can change on any Teams deploy. Re-run a
+  self-chat smoke test after a UI change.
+
+ZCode parity (2026-11-06):
+
+| Path | Purpose |
+|---|---|
+| `~/.zcode/skills/teams-web` | Symlink to the OpenCode skill |
+| `~/.zcode/commands/teams.md` | `/teams <task>` command in ZCode |
+| `~/.zcode/cli/config.json` → `mcp.servers.chrome_devtools` | Headless MCP against `~/.cache/chrome-devtools-mcp/chrome-profile-zcode` |
+
+The ZCode profile is a copy of the OpenCode Chrome profile, so the Teams session
+carried over. It is separate because Chrome locks a user-data-dir and both
+harnesses may run at the same time. Sessions diverge after the copy: when Teams
+expires in one profile, sign in again in that profile only. Restart ZCode after
+changing its command or MCP config.
+
 ## Not included
 
 | Item | Why |

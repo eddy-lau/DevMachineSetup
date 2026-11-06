@@ -20,6 +20,11 @@
 
 (fill in with user)
 
+# Repositories
+| Repo (path) | Remote | Purpose | Build/test | Own AGENTS.md |
+|---|---|---|---|---|
+| . | github.com/eddy-lau/DevMachineSetup | Documentation-only Mac setup notes | No build; `json5` + `bash -n` checks | yes |
+
 # Project memory
 
 - docs/agents/handoff.md — current state; read at session start
