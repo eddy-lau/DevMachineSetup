@@ -2,6 +2,7 @@
 > Last updated: 2026-11-08   By: opencode
 
 ## State
+- agent-sync 2026-11-09: AGENTS.md memory pointer + repo map valid; handoff 90 lines; 12 ZCode skill links and 11 shared skill links all resolve; 5 MCP servers at normalized parity (`chrome_devtools` shared on `127.0.0.1:9229`); no project shadow dirs; nested `opencode/AGENTS.md` noted (ZCode ignores nested files).
 - 2026-11-08: Shared Chrome for OpenCode, ZCode, OpenClaw, Hermes — live.
   - LaunchAgent `ai.chrome.shared` runs Chrome 156 headless on profile `~/.cache/chrome-devtools-mcp/chrome-profile`, CDP `http://127.0.0.1:9229` (loopback). Port 9222 already held by the daily Chrome.
   - Helper `~/.local/bin/chrome-shared-login`: boots out the LaunchAgent, opens the same profile headed with Teams + WhatsApp loaded, waits for MFA/QR, then restarts headless and verifies `9229`. Verified end-to-end twice: headed → CDP up → quit → headless back in ~14 s. Interrupt guard verified: TERM while headed leaves the agent stopped and prints the `launchctl bootstrap` recovery command.
