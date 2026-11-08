@@ -9,8 +9,9 @@
   - OpenClaw: `browser.attachOnly=true`, `defaultProfile=shared`, `profiles.shared.cdpUrl=http://127.0.0.1:9229`, MCP `chrome_devtools`; gateway restarted. Verified with `openclaw agent exec`: `chrome_devtools__list_pages` returned 3 pages. Native browser opened a Teams tab in the shared Chrome.
   - Hermes: `browser.cdp_url=http://127.0.0.1:9229`, `skills.external_dirs=["~/.agents/skills"]`, MCP `chrome_devtools` 32 tools; gateway restarted.
   - Skills: `whatsapp-web` linked into `~/.agents/skills`; both skills visible in OpenClaw (`agents-skills-personal`) and Hermes (`external`). Teams tabs tagged via `sessionStorage.shared_agent` because Teams strips URL query/hash.
-  - Verified read-only after a Chrome restart: Teams 21 chat rows (profile still logged in), WhatsApp 15–21 chat rows with no QR. Teams still shows a "We need you to sign in again" banner while chats render; run `chrome-shared-login` if send/reauth is needed. Tabs do not survive a restart; current tabs are one shared WhatsApp tab plus one Teams tab tagged `opencode`, recreated after the helper tests.
+  - Verified read-only after a Chrome restart: Teams 21 chat rows (profile still logged in), WhatsApp 15–21 chat rows with no QR. Tabs do not survive a restart; current tabs are one shared WhatsApp tab plus one Teams tab tagged `opencode`, recreated after the helper tests.
   - Backups: configs `*.bak-shared-chrome-20261108-090544`; profile clone `chrome-profile.backup-20261108-090544`; old `chrome-profile-zcode` kept.
+  - Later 2026-11-08: read + write smoke passed on the shared profile. Teams self-chat send verified (mid `1794140741184`), WhatsApp self-chat send verified (`3EB07899EC8A9B58FCF163`). Teams banner was gone on this run and no reauth was needed. Chrome had restarted (pid changed, tabs dropped); Teams/WhatsApp tabs were recreated and all four sessions survived. Teams send `data-tid` varies between `newMessageCommands-send` and `sendMessageCommands-send`; skill updated to try both.
 - 2026-11-07: OpenClaw + Hermes updated to current stable, both gateways verified live.
   - OpenClaw 2026.10.6 → **2026.11.1** (npm install, `stable` channel). Gateway restarted and verified: LaunchAgent loaded, pid running, listening `127.0.0.1:18789`, CLI + Gateway both report 2026.11.1.
   - Post-update `tavily`/`whatsapp`/`zai` plugin migration warnings cleared by `openclaw update repair --yes`; all three plugins now at 2026.11.1.
@@ -71,7 +72,6 @@
 
 ## In flight
 - ZCode app/new session restart to load the shared `chrome_devtools` command.
-- Teams "sign in again" banner: run `chrome-shared-login` and complete MFA before sending.
 
 ## Gotchas
 - WhatsApp Web rows ignore synthetic `.click()` — chat/list rows need real pointer events (MCP `click` with a snapshot uid); buttons (Send, New chat) accept JS click. Search typing needs the native value setter + `input` event; MCP `fill` mangles the input. Search never matches the self-chat ("Message yourself") — open it via the New chat panel. `Enter` in the composer sends.
