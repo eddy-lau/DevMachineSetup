@@ -443,16 +443,26 @@ over Tailscale, so it works on the office LAN and off-site; chat and image gener
 share VRAM, so generating an image evicts the chat model for ~150 s.
 
 The mini also has a machine-local `/zcode` bridge: OpenCode drives the ZCode desktop
-app through Chrome DevTools MCP and spends the free ZCode Start Plan quota. Chrome
-runs headless, so there is no visible automation window. It needs the ZCode Remote
-Control tab open in the dedicated Chrome profile; see
-[`opencode/README.md`](opencode/README.md#zcode-remote-worker-start-plan).
+app through Chrome DevTools MCP and spends the free ZCode Start Plan quota. One
+supervised headless Chrome runs on the shared profile at
+`http://127.0.0.1:9229`; OpenCode, ZCode, OpenClaw, and Hermes all attach to it.
+The ZCode Remote Control tab must be open in that shared profile. See
+[`opencode/README.md`](opencode/README.md#shared-chrome-for-browser-automation).
 
-The same MCP Chrome profile carries a machine-local `/teams` helper for Microsoft
-Teams personal, also headless. Graph does not support personal Microsoft accounts,
-so OpenCode drives `teams.live.com` through Chrome DevTools MCP; see
+The same shared Chrome profile carries a machine-local `/teams` helper for Microsoft
+Teams personal. Graph does not support personal Microsoft accounts, so OpenCode
+drives `teams.live.com` through Chrome DevTools MCP; see
 [`opencode/README.md`](opencode/README.md#teams-personal-web-client). ZCode has the
-same `/teams` command, backed by a separate headless Chrome profile.
+same `/teams` command, and OpenClaw/Hermes load the same skill; one Teams login
+covers all four, with a separate tagged tab per harness.
+
+A machine-local `/whatsapp` helper works the same way for WhatsApp personal
+(verified 2026-11-07). WhatsApp has no API for personal accounts and protocol
+bridges get accounts banned, so the helper drives `web.whatsapp.com` through the
+same Chrome DevTools MCP; see
+[`opencode/README.md`](opencode/README.md#whatsapp-personal-web-client). One
+headed-Chrome QR scan links the shared profile; all harnesses reuse the same
+WhatsApp tab and session.
 
 ## 12. Maintenance
 

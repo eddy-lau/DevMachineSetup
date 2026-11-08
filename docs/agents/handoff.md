@@ -1,7 +1,32 @@
 # Handoff
-> Last updated: 2026-11-06   By: opencode
+> Last updated: 2026-11-08   By: opencode
 
 ## State
+- 2026-11-08: Shared Chrome for OpenCode, ZCode, OpenClaw, Hermes — live.
+  - LaunchAgent `ai.chrome.shared` runs Chrome 156 headless on profile `~/.cache/chrome-devtools-mcp/chrome-profile`, CDP `http://127.0.0.1:9229` (loopback). Port 9222 already held by the daily Chrome.
+  - Helper `~/.local/bin/chrome-shared-login`: boots out the LaunchAgent, opens the same profile headed with Teams + WhatsApp loaded, waits for MFA/QR, then restarts headless and verifies `9229`. Verified end-to-end twice: headed → CDP up → quit → headless back in ~14 s. Interrupt guard verified: TERM while headed leaves the agent stopped and prints the `launchctl bootstrap` recovery command.
+  - OpenCode + ZCode `chrome_devtools` MCP now `npx -y chrome-devtools-mcp@latest --browserUrl http://127.0.0.1:9229 --no-usage-statistics`. `opencode reload` applied and `tools.chrome_devtools.list_pages` works. Stale ZCode-profile MCP wrappers (`--userDataDir=...chrome-profile-zcode`) were killed; only shared-`--browserUrl` wrappers remain. ZCode app/new session still needs a restart to load the new command.
+  - OpenClaw: `browser.attachOnly=true`, `defaultProfile=shared`, `profiles.shared.cdpUrl=http://127.0.0.1:9229`, MCP `chrome_devtools`; gateway restarted. Verified with `openclaw agent exec`: `chrome_devtools__list_pages` returned 3 pages. Native browser opened a Teams tab in the shared Chrome.
+  - Hermes: `browser.cdp_url=http://127.0.0.1:9229`, `skills.external_dirs=["~/.agents/skills"]`, MCP `chrome_devtools` 32 tools; gateway restarted.
+  - Skills: `whatsapp-web` linked into `~/.agents/skills`; both skills visible in OpenClaw (`agents-skills-personal`) and Hermes (`external`). Teams tabs tagged via `sessionStorage.shared_agent` because Teams strips URL query/hash.
+  - Verified read-only after a Chrome restart: Teams 21 chat rows (profile still logged in), WhatsApp 15–21 chat rows with no QR. Teams still shows a "We need you to sign in again" banner while chats render; run `chrome-shared-login` if send/reauth is needed. Tabs do not survive a restart; current tabs are one shared WhatsApp tab plus one Teams tab tagged `opencode`, recreated after the helper tests.
+  - Backups: configs `*.bak-shared-chrome-20261108-090544`; profile clone `chrome-profile.backup-20261108-090544`; old `chrome-profile-zcode` kept.
+- 2026-11-07: OpenClaw + Hermes updated to current stable, both gateways verified live.
+  - OpenClaw 2026.10.6 → **2026.11.1** (npm install, `stable` channel). Gateway restarted and verified: LaunchAgent loaded, pid running, listening `127.0.0.1:18789`, CLI + Gateway both report 2026.11.1.
+  - Post-update `tavily`/`whatsapp`/`zai` plugin migration warnings cleared by `openclaw update repair --yes`; all three plugins now at 2026.11.1.
+  - Remaining OpenClaw warnings are pre-existing config/security items: plaintext secrets in `openclaw.json`, WhatsApp `groupPolicy="open"` for `worship`, Telegram group privacy-mode notices, deprecation of plugin SDK `loadAuthProfileStoreForRuntime` (final compat 2026-12-31), and Node 24.20.0 (nvm) below the Oct-2026 eMudhra security patch level. Gateway itself runs Homebrew Node 26.12.1, so the Node warning is CLI-only unless nvm is bumped.
+  - Hermes Agent v0.22.1+233.gacc3cad → **v0.23.0** (commit `2bd378ed1b8d`, git install, detached). Pre-update stash restored cleanly; local mods in `hermes_cli/colors.py`, `hermes_cli/config.py` + one untracked test preserved, no conflicts.
+  - Hermes config migrated v51 → v52 (`twc-worship` profile); bundled skills synced (+1 new, 10 updated, 1 user-modified kept); TUI/web UI rebuilt; launchd gateway restarted and confirmed up to date.
+  - Pre-existing Hermes warning unchanged: gateway is standalone (serves `default` only); `twc-worship` is parked because both profiles hold the same Telegram and QQ bot credentials. Fix if wanted: give `twc-worship` its own tokens or run `hermes gateway migrate --multiplex`.
+  - OpenClaw update artifacts: report `~/.openclaw/update-reports/5d838883-bfce-4559-978b-ace7aefb2226.md`; DB snapshots under `/opt/homebrew/lib/node_modules/.openclaw.package-backup-91044-1794021262881.databases`. Capture marked incomplete (no sealed manifest) — evidence artifact only, update itself verified.
+- 2026-11-07: WhatsApp Web read/write for both harnesses, verified live end-to-end.
+  - Artifacts: skill `~/.config/opencode/skills/whatsapp-web/{SKILL.md,voice.md}`, command `~/.config/opencode/commands/whatsapp.md` (`/whatsapp <task>`); ZCode mirror: `~/.zcode/skills/whatsapp-web` symlink + `~/.zcode/commands/whatsapp.md` copy. `zcode skills/commands list` confirmed registration; OpenCode picks both up at next start.
+  - Both MCP profiles (OpenCode `chrome-profile`, ZCode `chrome-profile-zcode`) linked as WhatsApp devices. Linking recipe (in skill): kill headless Chrome holding the profile lock → headed Chrome on same profile → user scans QR → quit headed → headless MCP reuses session. First QR attempts hit WhatsApp server block "Can't link new devices right now" (only 2 devices linked, HK residential IP); cleared after ~15 min.
+  - Verified in ZCode profile: headless chat list (22 rows), open Foster chat, self-chat send read-back (`3EB0B7114FF8F73FC2E140`), formatting `*bold* _italic_ ~strike~ \`code\`` → strong/em/del/code, Enter sends. OpenCode profile verified headless read (22 chat rows) via one-off stdio MCP probe.
+  - Key selectors: rows `[aria-label="Chat list"] [role="row"]`, messages `#main [data-id]` with `[data-pre-plain-text]` = `[time, date] Author: `, text `span.selectable-text`, composer `#main div[contenteditable="true"][data-tab="10"]`, send `#main button[aria-label="Send"]`.
+  - voice.md built from ~15 own messages across 5 chats: short, colloquial written Cantonese, bare links, `唔該晒` closings, no emoji; structured numbered lists for technical asks. Self-chat is user's notepad.
+  - Repo docs updated (`opencode/README.md` WhatsApp section, root `README.md` §11). QR PNGs deleted; `.gitignore` now excludes `.scratch/`.
+  - Not tested: attachments, group sends, unread badge selector (no unread existed), session survival across Chrome restart per profile.
 - agent-sync 2026-11-02: created AGENTS.md, docs/agents/handoff.md, docs/agents/decisions.md. Global rules symlink, skills links, and MCP parity already clean.
 - Panoptic LLM setup 2026-11-04, verified live:
   - Provider `panoptic` added to `~/.config/opencode/opencode.json` (V2 `providers` block beside the legacy V1 `provider` block; both merge).
@@ -40,18 +65,25 @@
   - ZCode profile is a copy of the OpenCode Chrome profile (628 MB), so Teams cookies carried over; verified headless load with 21 chats. Separate dir avoids Chrome profile lock when both harnesses run.
   - Verified: `zcode skills list` shows `teams-web`; `zcode commands list` shows `teams`; MCP stdio handshake returns 32 tools. ZCode restart required to load the new server/command.
   - Profiles diverge after copy: Teams session expiry must be handled per profile (sign in headed once on the copy if needed).
+  - Superseded 2026-11-08: ZCode now attaches to the shared Chrome profile on `127.0.0.1:9229`; `chrome-profile-zcode` is unused.
 - agent-sync 2026-11-06: `teams-web` linked into `~/.agents/skills` (was the only real gap). ZCode/OpenCode parity: 5 MCP servers each, `chrome_devtools` differs only by its separate headless profile. `/teams` command present in both; `/zcode` stays OpenCode-only. No project shadow dirs; global rules symlink valid; handoff 56 lines.
   - Not tested: session survival across a browser restart, search, attachments, group-chat sends. Sending to humans is gated on explicit instruction.
 
 ## In flight
-(none)
+- ZCode app/new session restart to load the shared `chrome_devtools` command.
+- Teams "sign in again" banner: run `chrome-shared-login` and complete MFA before sending.
 
 ## Gotchas
+- WhatsApp Web rows ignore synthetic `.click()` — chat/list rows need real pointer events (MCP `click` with a snapshot uid); buttons (Send, New chat) accept JS click. Search typing needs the native value setter + `input` event; MCP `fill` mangles the input. Search never matches the self-chat ("Message yourself") — open it via the New chat panel. `Enter` in the composer sends.
+- WhatsApp re-login (shared profile): run `~/.local/bin/chrome-shared-login`; it stops the shared headless Chrome, opens the same profile headed with Teams + WhatsApp loaded, and restarts the LaunchAgent after you quit Chrome. Never `pkill` or launch a second Chrome on `~/.cache/chrome-devtools-mcp/chrome-profile`. QR may hit a temporary server block "Can't link new devices right now"; wait 10–30 min.
+- A shared Chrome restart drops every tab. Sessions survive in the profile; recreate the WhatsApp tab once (first caller) and one Teams tab per harness with its `shared_agent` marker.
 - Chat and image gen share VRAM: an image request stops llama.cpp (~150 s cold swap); chat afterwards pays cold start again.
 - First image request after chat can fail with `ECONNRESET` mid-swap; retry once.
 - Gateway is one slot, FIFO, chat prioritised; expect ~9-19 tok/s, 8-60 s cold starts, 900 s deadline.
 - Existing `{env:...}` keys (agnes/sensenova/mistral) resolve empty in the running service; they need the same `{file:...}` treatment if used.
-- ZCode remote bridge: Chrome MCP must launch with its dedicated profile and the ZCode remote tab must stay open. If the MCP browser restarts, reopen the remote link; the helper is lost on reload and must be re-injected with `install.sh`.
-- `chrome-devtools-mcp --autoConnect` cannot read the main Chrome profile's `DevToolsActivePort` from the OpenCode service (macOS permission denied). The bridge uses the MCP-managed profile instead; the main Chrome profile's remote-debugging toggle is not needed.
+- ZCode remote bridge: the remote tab now lives in the shared Chrome profile on `http://127.0.0.1:9229`; reopen the remote link there if the tab is lost. The helper is lost on reload and must be re-injected with `install.sh`.
+- `chrome-devtools-mcp` 1.12+ requires `pageId` on `evaluate_script`; pass the current `list_pages` id. Page ids can reorder when tabs are added/selected, so refresh `list_pages` before each call.
+- Teams strips `?agent=` / `#agent=` URL markers. Tag each harness tab in page state: `sessionStorage.shared_agent` plus `document.documentElement.dataset.sharedAgent`. WhatsApp allows one active tab per profile; all harnesses reuse it.
+- `chrome-devtools-mcp --autoConnect` cannot read the main Chrome profile's `DevToolsActivePort` from the OpenCode service (macOS permission denied). The shared bridge uses an explicit LaunchAgent plus `--browserUrl` instead; the main Chrome profile's remote-debugging toggle is not needed.
 - ZCode app-bundled standalone CLI cannot use Start Plan headlessly; only the desktop/remote path can. Start Plan currently exposes `GLM-5.3-Flash`, not `GLM-5.3`.
 - Remote-control URLs and the MCP Chrome profile are bearer credentials; never paste them into logs, commits, or chat.
