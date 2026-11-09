@@ -2,6 +2,7 @@
 > Last updated: 2026-11-09   By: opencode
 
 ## State
+- 2026-11-09: zcode-remote now usable from all three harnesses. `~/.agents/skills/zcode-remote` symlink exposes it to OpenClaw (`agents-skills-personal`, both `main` and `twc-worship-bot`) and Hermes (`external`, enabled). OpenClaw gateway and Hermes gateway restarted to reload catalogs. Live cross-harness runs passed: OpenClaw `agent exec` drove one ZCode turn (`GLM-5.3-Flash`, prefixed tools `chrome_devtools__*`) and Hermes `-z` drove another; each returned `Conventions`, assistant rows 2 then 3, no approvals, no file changes. One shared remote tab means turns must be serialized across harnesses.
 - 2026-11-09: zcode-remote verified live through the shared Chrome. Remote tab logged in on the shared profile; bridge installed; read-only prompt returned `Conventions` (first AGENTS.md heading). UI showed Start Plan / GLM-5.3-Flash Max / Ask before changes. `sourcePath` injection was blocked by the MCP roots restriction; skill now documents the inline-`function` fallback. Remote tab left open; bearer URL not stored.
 - agent-sync 2026-11-09: AGENTS.md memory pointer + repo map valid; handoff 91 lines; 12 ZCode skill links and 11 shared skill links all resolve; 5 MCP servers at normalized parity (`chrome_devtools` shared on `127.0.0.1:9229`); no project shadow dirs; nested `opencode/AGENTS.md` noted (ZCode ignores nested files).
 - 2026-11-08: Shared Chrome for OpenCode, ZCode, OpenClaw, Hermes — live.
@@ -89,3 +90,4 @@
 - `chrome-devtools-mcp --autoConnect` cannot read the main Chrome profile's `DevToolsActivePort` from the OpenCode service (macOS permission denied). The shared bridge uses an explicit LaunchAgent plus `--browserUrl` instead; the main Chrome profile's remote-debugging toggle is not needed.
 - ZCode app-bundled standalone CLI cannot use Start Plan headlessly; only the desktop/remote path can. Start Plan currently exposes `GLM-5.3-Flash`, not `GLM-5.3`.
 - Remote-control URLs and the MCP Chrome profile are bearer credentials; never paste them into logs, commits, or chat.
+- zcode-remote from OpenClaw/Hermes: one shared ZCode remote tab and one desktop session, so serialize turns across harnesses; the in-page bridge only guards itself. OpenClaw exposes tools as `chrome_devtools__evaluate_script` etc., so use the prefixed names.
