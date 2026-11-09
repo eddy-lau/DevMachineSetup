@@ -9,6 +9,9 @@
   - ZCode bridge extended with `projects()`, `sessions()`, `openSession()`, `newSession()`, `setModel()`, `setMode()`, `run()`, `restore()`. Live verified: 10 projects, session open, model switch GLM-5.3 ↔ GLM-5.3-Flash, mode Ask before changes. ZCode has no read-only Plan mode; `plan` degrades to `Ask before changes` and records `degraded: true`. Radix menus need keyboard Enter; plain DOM `.click()` does not open them.
   - Shared Chrome tabs recreated: WhatsApp, Teams personal, ZCode remote. Doctor green. Remote URL never stored in repo.
   - OpenCode worker agent is `build`; there is no `worker` agent in current config.
+  - Manual first tick completed 2026-11-09 22:26–22:36: 54 messages (18 WhatsApp, 36 Teams), 2 tasks (`C-20261109-001` company todo, `P-20261109-001` personal triage), digests delivered to both self-chats. Run record shows `unknown` because the scheduler reclaimed the execution when the owner process exited, but the agent completed successfully.
+  - First tick found two gaps: Hermes terminal `python3` is Xcode 3.9 without PyYAML, so all helpers failed until `system/scripts/py` wrapper was added; Teams work chats had no category overrides and raw rows first landed under `personal/`. Fixed: wrapper committed; Teams work-chat overrides added; Teams raw moved to `company/ingest/teams/2026-11.jsonl`; sender guidance now requires `aria-labelledby`/`message-author-name`. Added `worship` workspace registry entry.
+  - Hermes was paused during the fix via `hermes pause`; resume before 23:00 with `hermes resume`.
 - 2026-11-09: zcode-remote now usable from all three harnesses. `~/.agents/skills/zcode-remote` symlink exposes it to OpenClaw (`agents-skills-personal`, both `main` and `twc-worship-bot`) and Hermes (`external`, enabled). OpenClaw gateway and Hermes gateway restarted to reload catalogs. Live cross-harness runs passed: OpenClaw `agent exec` drove one ZCode turn (`GLM-5.3-Flash`, prefixed tools `chrome_devtools__*`) and Hermes `-z` drove another; each returned `Conventions`, assistant rows 2 then 3, no approvals, no file changes. One shared remote tab means turns must be serialized across harnesses.
 - 2026-11-09: zcode-remote verified live through the shared Chrome. Remote tab logged in on the shared profile; bridge installed; read-only prompt returned `Conventions` (first AGENTS.md heading). UI showed Start Plan / GLM-5.3-Flash Max / Ask before changes. `sourcePath` injection was blocked by the MCP roots restriction; skill now documents the inline-`function` fallback. Remote tab left open; bearer URL not stored.
 - agent-sync 2026-11-09: AGENTS.md memory pointer + repo map valid; handoff 91 lines; 12 ZCode skill links and 11 shared skill links all resolve; 5 MCP servers at normalized parity (`chrome_devtools` shared on `127.0.0.1:9229`); no project shadow dirs; nested `opencode/AGENTS.md` noted (ZCode ignores nested files).
@@ -81,7 +84,7 @@
   - Not tested: session survival across a browser restart, search, attachments, group-chat sends. Sending to humans is gated on explicit instruction.
 
 ## In flight
-- First live hourly tick at 2026-11-09T23:00. Verify: ingest reads both sources, digest lands in each self-chat, raw JSONL committed, low-risk tasks auto-ready, at most one OpenCode + one ZCode dispatch, no approval stuck.
+- First scheduled tick at 2026-11-09T23:00 after `hermes resume`. Manual first tick already completed with 2 tasks and 2 digests. Verify the scheduled run repeats cleanly with the `py` wrapper and Teams overrides.
 - ZCode app/new session restart to load the shared `chrome_devtools` command.
 
 ## Gotchas
