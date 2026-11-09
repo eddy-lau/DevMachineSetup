@@ -2,6 +2,13 @@
 > Last updated: 2026-11-09   By: opencode
 
 ## State
+- 2026-11-09: **Agent task board built and active.** Private monorepo `eddy-lau/agent-tasks` cloned at `~/.agents/tasks`; 6 skills (`tasks-board`, `tasks-triage`, `tasks-ingest`, `tasks-dispatch`, `tasks-review`, `tasks-admin`) symlinked into `~/.agents/skills` and visible in Hermes. Two queues (`personal/`, `company/`) with category claims: personal = `/Volumes/Orico/Projects`, company = `/Volumes/Orico/Projects/PanopticAI`. Longest claim wins; unclaimed paths fail closed. Helper scripts use Python 3 + PyYAML: `classify_path.py`, `routing.py`, `lock.py`, `busy.py`, `manifest.py`, `git_sync.py`, `ingest_state.py`, `redact.py`, `task_id.py`, `board.py`, `event.py`, `budget.py`, `doctor.py`.
+  - Hermes cron `agent-tasks-hourly` id `25f4c7cdd3a9`, active, `0 * * * *` Asia/Hong_Kong, model `deepseek-v4.1-flash`, workdir `~/.agents/tasks`, skills: tasks-board, tasks-triage, tasks-ingest, tasks-dispatch, whatsapp-web, teams-web, zcode-remote. First scheduled run 2026-11-09T23:00.
+  - Global budget: 1 OpenCode + 1 ZCode per hour across both categories; ZCode globally serial. Routing: OpenCode default `opencode/deepseek-v4.1-flash-free`, review/high-risk `opencode/deepseek-v4.1-flash`; ZCode default `GLM-5.3-Flash`, plan/research/high-risk `GLM-5.3`; Hermes tick `deepseek-v4.1-flash`. No GLM in OpenCode.
+  - Ingest: all chats with new messages, first run last 24h/20 messages, 30 chats/50 messages per source, 10 new tasks per source. Raw messages redacted and committed under `<category>/ingest/<source>/YYYY-MM.jsonl`. Digest sent to each source's self-chat and committed under `system/audit/ingest/`. Low-risk docs/admin/research auto-ready; code/ops never do.
+  - ZCode bridge extended with `projects()`, `sessions()`, `openSession()`, `newSession()`, `setModel()`, `setMode()`, `run()`, `restore()`. Live verified: 10 projects, session open, model switch GLM-5.3 ↔ GLM-5.3-Flash, mode Ask before changes. ZCode has no read-only Plan mode; `plan` degrades to `Ask before changes` and records `degraded: true`. Radix menus need keyboard Enter; plain DOM `.click()` does not open them.
+  - Shared Chrome tabs recreated: WhatsApp, Teams personal, ZCode remote. Doctor green. Remote URL never stored in repo.
+  - OpenCode worker agent is `build`; there is no `worker` agent in current config.
 - 2026-11-09: zcode-remote now usable from all three harnesses. `~/.agents/skills/zcode-remote` symlink exposes it to OpenClaw (`agents-skills-personal`, both `main` and `twc-worship-bot`) and Hermes (`external`, enabled). OpenClaw gateway and Hermes gateway restarted to reload catalogs. Live cross-harness runs passed: OpenClaw `agent exec` drove one ZCode turn (`GLM-5.3-Flash`, prefixed tools `chrome_devtools__*`) and Hermes `-z` drove another; each returned `Conventions`, assistant rows 2 then 3, no approvals, no file changes. One shared remote tab means turns must be serialized across harnesses.
 - 2026-11-09: zcode-remote verified live through the shared Chrome. Remote tab logged in on the shared profile; bridge installed; read-only prompt returned `Conventions` (first AGENTS.md heading). UI showed Start Plan / GLM-5.3-Flash Max / Ask before changes. `sourcePath` injection was blocked by the MCP roots restriction; skill now documents the inline-`function` fallback. Remote tab left open; bearer URL not stored.
 - agent-sync 2026-11-09: AGENTS.md memory pointer + repo map valid; handoff 91 lines; 12 ZCode skill links and 11 shared skill links all resolve; 5 MCP servers at normalized parity (`chrome_devtools` shared on `127.0.0.1:9229`); no project shadow dirs; nested `opencode/AGENTS.md` noted (ZCode ignores nested files).
@@ -74,6 +81,7 @@
   - Not tested: session survival across a browser restart, search, attachments, group-chat sends. Sending to humans is gated on explicit instruction.
 
 ## In flight
+- First live hourly tick at 2026-11-09T23:00. Verify: ingest reads both sources, digest lands in each self-chat, raw JSONL committed, low-risk tasks auto-ready, at most one OpenCode + one ZCode dispatch, no approval stuck.
 - ZCode app/new session restart to load the shared `chrome_devtools` command.
 
 ## Gotchas
@@ -88,6 +96,8 @@
 - `chrome-devtools-mcp` 1.12+ requires `pageId` on `evaluate_script`; pass the current `list_pages` id. Page ids can reorder when tabs are added/selected, so refresh `list_pages` before each call.
 - Teams strips `?agent=` / `#agent=` URL markers. Tag each harness tab in page state: `sessionStorage.shared_agent` plus `document.documentElement.dataset.sharedAgent`. WhatsApp allows one active tab per profile; all harnesses reuse it.
 - `chrome-devtools-mcp --autoConnect` cannot read the main Chrome profile's `DevToolsActivePort` from the OpenCode service (macOS permission denied). The shared bridge uses an explicit LaunchAgent plus `--browserUrl` instead; the main Chrome profile's remote-debugging toggle is not needed.
-- ZCode app-bundled standalone CLI cannot use Start Plan headlessly; only the desktop/remote path can. Start Plan currently exposes `GLM-5.3-Flash`, not `GLM-5.3`.
+- ZCode app-bundled standalone CLI cannot use the remote-only account path headlessly; use the desktop/remote tab. Current ZCode model IDs are `GLM-5.3`, `GLM-5.3-Flash` (menu shows `GLM-5.3-Flash Vision`), and `GLM-5.3-Flash Vision`. ZCode has no read-only Plan mode; `plan` degrades to `Ask before changes`.
 - Remote-control URLs and the MCP Chrome profile are bearer credentials; never paste them into logs, commits, or chat.
 - zcode-remote from OpenClaw/Hermes: one shared ZCode remote tab and one desktop session, so serialize turns across harnesses; the in-page bridge only guards itself. OpenClaw exposes tools as `chrome_devtools__evaluate_script` etc., so use the prefixed names.
+- Task board lives in `~/.agents/tasks` (`eddy-lau/agent-tasks`, private). Raw WhatsApp/Teams messages are committed with secret redaction; git history is permanent, so deletion does not remove them. `system/state/` and `runs/` are gitignored.
+- ZCode model and mode menus are Radix. Plain DOM `.click()` does not open or select them; the bridge uses focus + keyboard Enter. Verify models through the menu's checked item, not the trigger text (`Choose model` can persist until the first turn).
