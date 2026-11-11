@@ -109,16 +109,17 @@ hermes send --to "qqbot:452935A057F8F611BFF0B9E2EB10B35C" "channel test"
 
 ## Approvals
 
-`approvals.mode` is `manual` with a 60 s timeout. A prompt you miss becomes a
-stalled task.
+`approvals.mode` stays `manual`; the timeout is now **600 s** (was 60 s, which the
+Hermes default itself calls "too tight for push notifications"). The QQ adapter
+renders dangerous-command approvals as inline keyboard buttons, so the flow is a
+tap, not typed text.
 
-Before departure, either:
-
-- accept it and keep tasks small enough to finish inside one approval window, or
-- switch to an allowlist for routine tools and leave `manual` only for
-  destructive operations.
-
-Do not run with `--yolo` while unattended.
+- `approvals.cron_mode: deny` is unchanged: cron sessions can never approve, so a
+  task that needs a dangerous command blocks and notifies instead of silently
+  proceeding.
+- If you miss a prompt, the command fails closed and the task blocks with a
+  reason. Nothing runs unapproved.
+- Do not run with `--yolo` while unattended.
 
 ## Known gaps
 
