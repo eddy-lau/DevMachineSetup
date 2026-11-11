@@ -39,6 +39,29 @@ QQ access is locked to one openid (`qqbot.dm_policy: allowlist`,
 
 Never wait in a chat turn for a coding task; the tick owns long work.
 
+## Message notifications
+
+WhatsApp and Teams are unreachable from a mainland phone, so the ingest tick
+pushes what it read over QQ instead of only into the source self-chat.
+
+- **Hourly**: `[ingest HH:MM] Teams · N msgs / M chats · K tasks` plus the first
+  three previews (DMs, then @mentions, then groups, newest first). More than
+  three messages → the full per-chat list rides as a `.md` attachment.
+- **On demand**: text `check` to get an ingest immediately and reply with
+  `checked: WA n / Teams n`.
+- **Archive**: the same digest still goes to the source self-chat with an
+  `[agent-digest]` prefix, so the home side keeps a searchable copy.
+- **Retry**: a failed QQ push is stored in
+  `system/state/ingest-digest-pending.json` and re-sent by the next
+  `notify.py scan` or by the watchdog's `flush`.
+- **Freshness**: the watchdog reports `ingest stalled` when the newest
+  `system/audit/ingest/*.md` is more than 3 h old — the signal that Chrome lost
+  the Teams or WhatsApp session.
+
+Secrets are redacted before the push (`redact.py`), but message text still
+transits Tencent. Attachments and replying back into WhatsApp/Teams are not
+covered; ask for a specific thread if you need one.
+
 ## Verb cheat sheet
 
 Copy-paste, one per message.
