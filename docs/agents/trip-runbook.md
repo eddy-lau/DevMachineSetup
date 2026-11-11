@@ -47,6 +47,8 @@ pushes what it read over QQ instead of only into the source self-chat.
 - **Hourly**: `[ingest HH:MM] Teams · N msgs / M chats · K tasks` plus the first
   three previews (DMs, then @mentions, then groups, newest first). More than
   three messages → the full per-chat list rides as a `.md` attachment.
+- **Quiet hours are silent**: a source with zero new messages writes its audit
+  file but sends nothing, so no news means no notification.
 - **On demand**: text `check` to get an ingest immediately and reply with
   `checked: WA n / Teams n`.
 - **Archive**: the same digest still goes to the source self-chat with an
