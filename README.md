@@ -444,8 +444,10 @@ share VRAM, so generating an image evicts the chat model for ~150 s.
 
 The mini also has a machine-local `/zcode` bridge: OpenCode drives the ZCode desktop
 app through Chrome DevTools MCP and spends the free ZCode Start Plan quota. One
-supervised headless Chrome runs on the shared profile at
+supervised headless Chrome for Testing runs on the shared profile at
 `http://127.0.0.1:9229`; OpenCode, ZCode, OpenClaw, and Hermes all attach to it.
+It is a separate browser app from the Dock's Chrome so the normal browser still
+opens windows.
 The ZCode Remote Control tab must be open in that shared profile. See
 [`opencode/README.md`](opencode/README.md#shared-chrome-for-browser-automation).
 

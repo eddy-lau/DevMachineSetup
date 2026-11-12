@@ -103,16 +103,40 @@ harnesses instead of a profile copy per harness.
 | Piece | Path / endpoint |
 |---|---|
 | LaunchAgent | `~/Library/LaunchAgents/ai.chrome.shared.plist` |
+| Browser binary | `~/.local/share/chrome-for-testing/current/chrome-mac-arm64/Google Chrome for Testing.app` |
 | Chrome profile | `~/.cache/chrome-devtools-mcp/chrome-profile` |
 | CDP endpoint | `http://127.0.0.1:9229` (loopback only) |
 | Manual login helper | `~/.local/bin/chrome-shared-login` |
 | Profile backup | `~/.cache/chrome-devtools-mcp/chrome-profile.backup-<stamp>` |
 
-The LaunchAgent runs Chrome 156 headless with `--user-data-dir=...`,
-`--remote-debugging-port=9229`, `--remote-debugging-address=127.0.0.1`, and
-`--remote-allow-origins=*`. Chrome allows one process per user-data-dir, so the
-LaunchAgent is the sole owner; never start another Chrome on that profile.
-Port 9229 is used because the daily Chrome already holds 9222.
+The LaunchAgent runs Chrome for Testing (CfT) headless with `--user-data-dir=...`,
+`--remote-debugging-port=9229`, `--remote-debugging-address=127.0.0.1`,
+`--remote-allow-origins=*`, and a real Chrome `--user-agent`. Chrome allows one
+process per user-data-dir, so the LaunchAgent is the sole owner; never start
+another Chrome on that profile. Port 9229 is used because the daily Chrome already
+holds 9222.
+
+Why CfT instead of `/Applications/Google Chrome.app`: the automation browser must
+have its own bundle identity. When the headless instance was the real Chrome app,
+macOS treated Chrome as already running, so clicking the Dock icon only activated
+the windowless headless process and no window ever opened. CfT has bundle id
+`com.google.chrome.for.testing`, so the Dock icon always launches the normal
+Chrome. The `--user-agent` override is required because WhatsApp Web rejects the
+`HeadlessChrome/...` UA string.
+
+Update CfT (no auto-update) and repoint the `current` symlink:
+
+```bash
+npx --yes @puppeteer/browsers install chrome@stable \
+  --path "$HOME/.local/share/chrome-for-testing"
+ls "$HOME/.local/share/chrome-for-testing/chrome"   # note the new version dir
+ln -sfn "$HOME/.local/share/chrome-for-testing/chrome/<new-version>" \
+  "$HOME/.local/share/chrome-for-testing/current"
+launchctl kickstart -k "gui/$(id -u)/ai.chrome.shared"
+```
+
+Bump the `--user-agent` major in the plist when you update if you care about the
+advertised version; any value ≥ Chrome 100 satisfies WhatsApp and Teams.
 
 | Harness | Wiring |
 |---|---|
@@ -128,11 +152,12 @@ Teams strips URL markers. WhatsApp permits one active tab per profile, so all
 harnesses reuse the single `web.whatsapp.com` tab.
 
 Manual login: run `chrome-shared-login`. It stops the LaunchAgent, opens the same
-profile headed with Teams and WhatsApp already loaded, and waits while you complete
-Teams MFA or scan the WhatsApp QR. Quit Chrome completely when finished; the helper
-restarts the headless instance and verifies `9229` answers. One login covers all
-four harnesses. If the helper is interrupted while Chrome is still open, it leaves
-the LaunchAgent stopped and prints the `launchctl bootstrap` command to recover.
+profile headed in Chrome for Testing with Teams and WhatsApp already loaded, and
+waits while you complete Teams MFA or scan the WhatsApp QR. Quit that browser
+completely when finished; the helper restarts the headless instance and verifies
+`9229` answers. One login covers all four harnesses. If the helper is interrupted
+while Chrome is still open, it leaves the LaunchAgent stopped and prints the
+`launchctl bootstrap` command to recover.
 
 Tabs do not survive a Chrome restart. Each harness recreates its own Teams tab on
 demand (tagged with its `shared_agent` marker), and the first WhatsApp caller
@@ -327,7 +352,8 @@ Review before copying — some skills reference absolute paths or local MCP serv
 | Legacy config wins | Another `opencode.json` exists; this script moves it to `backups/` |
 | Provider missing from `/models` | Env var not set, or run `opencode auth login` |
 | MCP server not connected | `opencode mcp list`, then `/mcps` to authenticate |
-| Shared Chrome not reachable | `curl -s http://127.0.0.1:9229/json/version`; `launchctl print gui/$(id -u)/ai.chrome.shared` |
+| Shared Chrome not reachable | `curl -s http://127.0.0.1:9229/json/version`; `launchctl print gui/$(id -u)/ai.chrome.shared`. If `--Browser`/`User-Agent` says `HeadlessChrome`, the UA override is missing |
+| Dock Chrome icon opens no window | The automation browser is the real Chrome app. Check `launchctl print` program path; it must be Chrome for Testing |
 | MCP still points at old profile | `ps aux \| grep chrome-devtools-mcp`; the args should include `--browserUrl http://127.0.0.1:9229` |
 | Teams/WhatsApp login expired | `~/.local/bin/chrome-shared-login`, complete MFA/QR, quit Chrome |
 | Plugin not loading | `opencode plugin list`, `opencode plugin check` |
