@@ -64,6 +64,26 @@ Secrets are redacted before the push (`redact.py`), but message text still
 transits Tencent. Attachments and replying back into WhatsApp/Teams are not
 covered; ask for a specific thread if you need one.
 
+## Task notifications
+
+Rule: **any task that is waiting on a human pings**. A quiet hour means nothing is
+stuck, not that nobody looked.
+
+| State | Event | What it means |
+| --- | --- | --- |
+| `inbox/` | `inbox_new` | raw capture, not triaged yet |
+| `triage/` | `triage_new` | needs a routing decision |
+| `todo/` | `todo_human` | needs a go-ahead before it can run |
+| `blocked/` | `blocked` | stopped, with `blocked_reason` |
+| `review/` | `review_human` | `approval: human`, waiting on your verdict |
+| `review/` | `review_auto_stale` | `approval: auto` that never got reviewed |
+| `ready/` | `ready_stale` | no worker picked it up after `stale_hours` |
+| `running/` | `running_stale` | run is far past normal, probably orphaned |
+
+`stale_hours` defaults to 6 in `notify.yaml`. Dedupe is per
+(task, state, event, updated), so a task pings once per change and again only if
+it is edited. Silence from a task in one of these states is a bug.
+
 ## Verb cheat sheet
 
 Copy-paste, one per message.
