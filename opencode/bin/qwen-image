@@ -153,6 +153,9 @@ def main() -> None:
             entry["path"] = str(path)
         elif item.get("url"):
             url = item["url"]
+            # The gateway's URL carries the server-side filename, which is what
+            # `qwen-edit` needs to use this image as a reference.
+            entry["server_filename"] = url.split("filename=")[-1].split("&")[0] if "filename=" in url else None
             if url.startswith("/"):
                 root = args.base_url.rstrip("/")
                 root = root[: -len("/v1")] if root.endswith("/v1") else root

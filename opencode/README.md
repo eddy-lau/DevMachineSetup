@@ -102,6 +102,45 @@ OpenCode uses the `experimental_image_generate` tool with
 `panoptic-image` skill plus an `/image <prompt>` command that calls the
 wrapper.
 
+### Editing and reference images
+
+The OpenAI-compatible endpoint cannot edit. `qwen-edit`
+([`bin/qwen-edit`](bin/qwen-edit)) drives the gateway's ComfyUI passthrough
+instead — it reuses the same 2.1 checkpoint through `TextEncodeQwenImage21`
+with reference slots (up to 16), so the edit keeps the subject instead of
+re-rolling it:
+
+```bash
+qwen-edit --list                                 # references available on the server
+qwen-edit gateway_00039_.png -p "same triangle, blue with a thick black outline" -o out.png
+```
+
+Verified 2026-11-17: green triangle → blue with black outline (1024², 100 s);
+orange hexagon icon → teal gradient with rounded corners (768², 63 s) and →
+navy with a thin gold outline (896², 76 s), both keeping the hexagon+chevron
+shape.
+
+Memory matters: reference latents ride on top of the cached model, and the
+gateway's two 9.65 GiB cards run out around 1024 px. The default is 896 px;
+the CLI retries once at 768 on an out-of-VRAM failure. Do not ask for 1024+
+edits on the shared box unless you know it is idle.
+
+Two gateway constraints shape this:
+
+- **Upload is blocked.** The passthrough allows `POST /comfy/prompt` and
+  `/comfy/interrupt` only; `/comfy/upload/image` returns 400. References must
+  already sit in the server's ComfyUI output folder, which is where every
+  gateway generation lands. `qwen-image … --url --json` emits
+  `server_filename` for chaining; a local PNG from this Mac cannot be
+  referenced until the operator allowlists the upload route.
+- **No alpha.** Asking for a transparent background still returns an opaque
+  image (measured alpha mean 0.999). Layered/alpha output would need a custom
+  workflow using `EmptyQwenImageLayeredLatentImage`.
+
+Autogrow reference slots are the easy trap here: they must be written as flat
+dotted keys (`"images.image_1": ["101", 0]`). A nested `images` dict is
+dropped silently and the job degrades to plain text-to-image with no error.
+
 ```bash
 opencode run --model panoptic/qwen3.8-27b "explain RAID levels briefly"
 ```

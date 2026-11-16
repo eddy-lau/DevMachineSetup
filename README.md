@@ -443,7 +443,9 @@ over Tailscale, so it works on the office LAN and off-site; chat and image gener
 share VRAM, so generating an image evicts the chat model for ~150 s. OpenCode calls
 the image model through its native image tool; ZCode (no native image tool) uses the
 same model through `qwen-image` / `/image`, installed from
-[`opencode/bin/qwen-image`](opencode/bin/qwen-image).
+[`opencode/bin/qwen-image`](opencode/bin/qwen-image). Reference-image editing goes
+through the ComfyUI passthrough with `qwen-edit`, which can only reference images
+already in the gateway's output folder — the gateway blocks uploads.
 
 The mini also has a machine-local `/zcode` bridge: OpenCode drives the ZCode desktop
 app through Chrome DevTools MCP and spends the free ZCode Start Plan quota. One

@@ -54,8 +54,10 @@ run install -m 0644 "$SRC/AGENTS.md" "$DEST/AGENTS.md"
 
 # qwen-image: image generation on the Panoptic LLM gateway.
 run mkdir -p "$HOME/.local/bin"
-run ln -sf "$SRC/bin/qwen-image" "$HOME/.local/bin/qwen-image"
-say "linked ~/.local/bin/qwen-image -> $SRC/bin/qwen-image"
+for tool in qwen-image qwen-edit; do
+  run ln -sf "$SRC/bin/$tool" "$HOME/.local/bin/$tool"
+  say "linked ~/.local/bin/$tool -> $SRC/bin/$tool"
+done
 
 cat <<EOF
 
