@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+"""Generate images with Qwen-Image 2.1 on the Panoptic LLM gateway.
+
+Stdlib only, so it runs under any python3 (Xcode, pyenv, Homebrew).
+
+Usage:
+    qwen-image "a red cube on white background"
+    qwen-image a red cube on white background -o cube.png
+    qwen-image "neon shop sign" --size 1536 -n 2 --seed 42
+    qwen-image "logo" --url          # gateway-hosted URLs instead of PNGs
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+from datetime import datetime
+from pathlib import Path
+
+DEFAULT_BASE_URL = "http://100.110.22.90:9000/v1"
+DEFAULT_MODEL = "qwen-image-2.1"
+KEY_FILE = Path.home() / ".config" / "opencode" / "panoptic-api-key"
+DEFAULT_OUTDIR = Path.home() / "Pictures" / "qwen-image"
+
+
+def api_key() -> str:
+    key = os.environ.get("PANOPTICLLM_APIKEY", "").strip()
+    if key:
+        return key
+    if KEY_FILE.is_file():
+        return KEY_FILE.read_text().strip()
+    sys.exit(
+        "error: no API key. Export PANOPTICLLM_APIKEY or write it to "
+        f"{KEY_FILE} (mode 600)."
+    )
+
+
+def resolve_out(out: str | None, index: int, count: int) -> Path:
+    """Return the PNG path for image `index`, creating the parent directory."""
+    suffix = f"-{index + 1}" if count > 1 else ""
+    if not out:
+        target = DEFAULT_OUTDIR / f"qwen-image-{datetime.now():%Y%m%d-%H%M%S}{suffix}.png"
+    else:
+        path = Path(out).expanduser()
+        if path.is_dir() or out.endswith("/"):
+            path = path / f"qwen-image-{datetime.now():%Y%m%d-%H%M%S}{suffix}.png"
+        elif count > 1:
+            path = path.with_name(f"{path.stem}{suffix}{path.suffix or '.png'}")
+        if path.suffix == "":
+            path = path.with_suffix(".png")
+        target = path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    return target
+
+
+def post(base_url: str, key: str, payload: dict, timeout: int) -> dict:
+    body = json.dumps(payload).encode()
+    url = base_url.rstrip("/") + "/images/generations"
+    headers = {
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+    }
+    for attempt in (1, 2):
+        req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return json.load(resp)
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode(errors="replace")[:400]
+            if exc.code in (502, 503, 504) and attempt == 1:
+                time.sleep(5)
+                continue
+            sys.exit(f"error: HTTP {exc.code} from {url}\n{detail}")
+        except urllib.error.URLError as exc:
+            # The gateway drops the connection while it swaps VRAM between the
+            # chat model and ComfyUI; the retry succeeds.
+            if attempt == 1:
+                time.sleep(5)
+                continue
+            sys.exit(f"error: cannot reach {url}: {exc.reason}")
+    sys.exit("error: unreachable")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Generate images with Qwen-Image 2.1 (Panoptic LLM gateway).",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("prompt", nargs="+", help="text prompt (quotes optional)")
+    parser.add_argument("-o", "--out", help="output PNG (or directory) for the first image")
+    parser.add_argument(
+        "--size",
+        type=int,
+        default=1024,
+        help="edge length; the gateway rounds to the nearest square (512-1536)",
+    )
+    parser.add_argument("-n", "--count", type=int, default=1, help="images to generate (max 4)")
+    parser.add_argument("--seed", type=int, help="sampler seed")
+    parser.add_argument("--negative", default="", help="negative prompt")
+    parser.add_argument(
+        "--url",
+        action="store_true",
+        help="ask for gateway URLs instead of downloading PNGs",
+    )
+    parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument(
+        "--base-url",
+        default=os.environ.get("PANOPTIC_BASE_URL", DEFAULT_BASE_URL),
+        help="OpenAI-compatible base URL",
+    )
+    parser.add_argument("--timeout", type=int, default=900, help="request timeout in seconds")
+    parser.add_argument("--json", action="store_true", help="print machine-readable JSON")
+    args = parser.parse_args()
+
+    if not 1 <= args.count <= 4:
+        sys.exit("error: -n must be 1-4")
+    if not 512 <= args.size <= 1536:
+        sys.exit("error: --size must be 512-1536")
+
+    prompt = " ".join(args.prompt).strip()
+    payload = {
+        "model": args.model,
+        "prompt": prompt,
+        "size": f"{args.size}x{args.size}",
+        "n": args.count,
+        "response_format": "url" if args.url else "b64_json",
+    }
+    if args.seed is not None:
+        payload["seed"] = args.seed
+    if args.negative:
+        payload["negative_prompt"] = args.negative
+
+    started = time.time()
+    data = post(args.base_url, api_key(), payload, args.timeout)
+    elapsed = round(time.time() - started, 1)
+
+    items = data.get("data") or []
+    if not items:
+        sys.exit(f"error: gateway returned no images\n{json.dumps(data)[:400]}")
+
+    results = []
+    for index, item in enumerate(items):
+        entry = {"index": index, "elapsed_s": elapsed, "prompt": prompt}
+        if item.get("b64_json"):
+            path = resolve_out(args.out, index, len(items))
+            path.write_bytes(base64.b64decode(item["b64_json"]))
+            entry["path"] = str(path)
+        elif item.get("url"):
+            url = item["url"]
+            if url.startswith("/"):
+                root = args.base_url.rstrip("/")
+                root = root[: -len("/v1")] if root.endswith("/v1") else root
+                url = root + url
+            entry["url"] = url
+            if args.url:
+                # Still save a copy: agents work from files, not URLs.
+                path = resolve_out(args.out, index, len(items))
+                with urllib.request.urlopen(url, timeout=args.timeout) as resp:
+                    path.write_bytes(resp.read())
+                entry["path"] = str(path)
+        else:
+            entry["raw"] = item
+        results.append(entry)
+
+    if args.json:
+        print(json.dumps({"model": args.model, "elapsed_s": elapsed, "images": results}, indent=2))
+        return
+
+    for entry in results:
+        print(entry.get("path") or entry.get("url") or entry.get("raw"))
+    print(f"# {args.model} · {args.size}px · {elapsed}s", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()

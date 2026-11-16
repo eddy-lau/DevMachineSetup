@@ -440,7 +440,10 @@ what is included, what is excluded, and troubleshooting.
 The office **Panoptic LLM** (`panoptic/qwen3.8-27b` for chat,
 `panoptic/qwen-image-2.1` for images) is also configured there. It reaches the gateway
 over Tailscale, so it works on the office LAN and off-site; chat and image generation
-share VRAM, so generating an image evicts the chat model for ~150 s.
+share VRAM, so generating an image evicts the chat model for ~150 s. OpenCode calls
+the image model through its native image tool; ZCode (no native image tool) uses the
+same model through `qwen-image` / `/image`, installed from
+[`opencode/bin/qwen-image`](opencode/bin/qwen-image).
 
 The mini also has a machine-local `/zcode` bridge: OpenCode drives the ZCode desktop
 app through Chrome DevTools MCP and spends the free ZCode Start Plan quota. One

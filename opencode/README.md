@@ -72,6 +72,36 @@ Kristian's office gateway serves two models on one OpenAI-compatible endpoint:
 | `qwen3.8-27b` | chat | llama.cpp, 128K ctx, text + image + PDF input, reasoning |
 | `qwen-image-2.1` | image | ComfyUI behind `/v1/images/generations` |
 
+Image generation is wired for OpenCode natively and for every other harness
+through `~/.local/bin/qwen-image`:
+
+```bash
+qwen-image a red cube on white background -o ~/Desktop/cube.png
+qwen-image "neon cafe sign" --size 1536 -n 2 --seed 42
+```
+
+Source of truth is [`bin/qwen-image`](bin/qwen-image) (stdlib Python, no
+deps); `install.sh` symlinks it into `~/.local/bin`. It reads the key from
+`PANOPTICLLM_APIKEY` or `~/.config/opencode/panoptic-api-key`, and the base
+URL from `PANOPTIC_BASE_URL` (default tailnet IP).
+
+Gateway limits, measured 2026-11-17:
+
+- `size` must be 512-1536 and is rounded to a **square**; aspect ratios are not
+  available (generate large, crop downstream).
+- `n` ≤ 4, `seed` and `negative_prompt` supported; ~30-80 s warm at 1024²,
+  plus ~150 s when swapping away from the chat model.
+- The queue is serial and chat preempts images — a slow run is normal; the
+  wrapper waits up to 900 s and retries once on the VRAM-swap reset.
+- There is **no `/v1/images/edits`**: no reference-image editing, inpainting,
+  or RGBA output. That would need a ComfyUI workflow over the `/comfy/*`
+  passthrough.
+
+OpenCode uses the `experimental_image_generate` tool with
+`panoptic/qwen-image-2.1`; ZCode has no native image tool, so it gets the
+`panoptic-image` skill plus an `/image <prompt>` command that calls the
+wrapper.
+
 ```bash
 opencode run --model panoptic/qwen3.8-27b "explain RAID levels briefly"
 ```
