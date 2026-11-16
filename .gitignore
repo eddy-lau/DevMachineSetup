@@ -1,1 +1,4 @@
 .scratch/
+
+# Python bytecode from local script checks
+__pycache__/
