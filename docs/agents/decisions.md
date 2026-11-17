@@ -2,6 +2,7 @@
 
 | Date | Tool | Decision | Why |
 |---|---|---|---|
+| 2026-11-17 | opencode | Add `cheap-implement` skill + pinned `cheap-worker` subagent: free-first model ladder (`opencode-go/deepseek-v4.1-flash` → `panoptic/qwen3.8-27b` → `openxlab/deepseek-v4-flash-0731`), explicit `model` on every launch, local LLMs excluded | Lets the smart model orchestrate/review while a free flash model implements; an unpinned subagent inherits the parent's expensive model, so the agent-file pin is load-bearing; owner excluded kapitsa/ollama |
 | 2026-11-02 | opencode | Rewrite README for the current Mac mini; drop legacy iMac content | Content described Monterey-era setup; user asked for current machine state |
 | 2026-11-02 | opencode | Add `Brewfile` snapshot and `opencode/` portable bundle | Reproducible restore for Mac mini and MacBook Air |
 | 2026-11-04 | opencode | Add `panoptic` provider using V2 `providers` block beside legacy V1 `provider` | Image model needs `type: "image"`, which V1 model entries lack; disjoint provider IDs make coexistence safe |
